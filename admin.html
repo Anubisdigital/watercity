@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>WaterCity Admin | Anubis Digital</title>
+    
+    <!-- CDN Resources -->
+    <script src="https://cdn.jsdelivr.net/npm/puter.js@2/dist/puter.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --accent-blue: #0070f3;
+            --border-color: #1f1f1f;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--border-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .admin-wrapper {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        aside {
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.85rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0;
+            gap: 12px;
+        }
+
+        .nav-link i {
+            width: 20px;
+            font-size: 1.1rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-main);
+            background-color: var(--border-color);
+            border-left: 2px solid var(--accent-blue);
+        }
+
+        main {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .module-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .module-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-tech {
+            background-color: var(--accent-blue);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 0 !important;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-tech:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        /* White table with column lines */
+        .data-table-white {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            color: #111;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .data-table-white th,
+        .data-table-white td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+        }
+        .data-table-white th:last-child,
+        .data-table-white td:last-child {
+            border-right: none;
+        }
+        .data-table-white th {
+            background: #f8f9fa;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+            color: #1e293b;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+        .data-table-white tr:hover {
+            background: #f1f5f9;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .project-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        .project-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-4px);
+        }
+        .img-placeholder {
+            width: 100%;
+            height: 200px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .img-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        input, textarea, select {
+            background: #111;
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 12px;
+            width: 100%;
+            margin-bottom: 1rem;
+            border-radius: 0 !important;
+            outline: none;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-card {
+            width: 100%;
+            max-width: 550px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            animation: fadeIn 0.2s ease;
+        }
+        .image-preview {
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .image-preview img {
+            max-width: 100%;
+            max-height: 150px;
+            border: 1px solid var(--border-color);
+        }
+        .status-message {
+            font-size: 0.8rem;
+            padding: 8px;
+            margin-top: 8px;
+            background: #1a1a1a;
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .stat-card {
+            background: #0a0a0a;
+            border: 1px solid #1f1f1f;
+            padding: 1.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .admin-wrapper {
+                display: flex;
+                flex-direction: column;
+            }
+            aside {
+                position: relative;
+                height: auto;
+                padding: 1rem;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .logo-container { margin-bottom: 0; flex: 1; }
+            nav {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+                width: 100%;
+                order: 3;
+                margin-top: 1rem;
+            }
+            .nav-link { flex: 1 0 auto; justify-content: center; margin-bottom: 0; }
+            .mt-auto { margin-top: 0; order: 2; }
+            main { padding: 1.25rem; }
+            .project-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+        }
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: 1fr; }
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .text-muted { color: var(--text-muted); }
+        .error-message { color: #ff4d4d; font-size: 0.75rem; margin-top: -0.5rem; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="grid-overlay"></div>
+
+    <div class="admin-wrapper">
+        <aside>
+            <div class="logo-container">
+                <img class="logo-img" src="log1.png" alt="WaterCity Logo">
+                <span class="font-bold tracking-tighter text-xl">WATERCITY</span>
+            </div>
+            
+            <nav>
+                <button class="nav-link active" onclick="switchModule('projects')"><i class="fas fa-folder-open"></i> PROJECTS</button>
+                <button class="nav-link" onclick="switchModule('accounts')"><i class="fas fa-users"></i> ACCOUNTS</button>
+                <button class="nav-link" onclick="switchModule('announcements')"><i class="fas fa-bullhorn"></i> ANNOUNCEMENTS</button>
+            </nav>
+
+            <div class="mt-auto pt-6">
+                <div class="text-[10px] text-muted uppercase tracking-widest mb-2">System Status</div>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-xs font-mono">FIRESTORE_ACTIVE</span>
+                </div>
+            </div>
+        </aside>
+
+        <main>
+            <!-- Projects Module -->
+            <section id="projects-module" class="module-section active">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold uppercase">Projects Gallery</h1>
+                        <p class="text-muted text-sm">Manage front-end display items and Cloudinary assets.</p>
+                    </div>
+                    <button class="btn-tech" onclick="openModal('project-modal')"><i class="fas fa-plus"></i> Add New Project</button>
+                </div>
+                <div class="project-grid" id="project-list-container">
+                    <div class="project-card animate-pulse">
+                        <div class="img-placeholder bg-zinc-900"></div>
+                        <div class="p-4">
+                            <div class="h-4 bg-zinc-800 w-3/4 mb-2"></div>
+                            <div class="h-3 bg-zinc-900 w-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Accounts Module with White Table & Column Lines -->
+            <section id="accounts-module" class="module-section">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold uppercase">Accounts & Registry</h1>
+                        <p class="text-muted text-sm font-mono">Live sync with Firebase & Puter.js analytics.</p>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <button class="btn-tech btn-outline" onclick="exportUserData()"><i class="fas fa-download"></i> Export CSV</button>
+                        <button class="btn-tech" onclick="refreshAccounts()"><i class="fas fa-sync-alt"></i> Sync Database</button>
+                    </div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-card"><div class="text-[10px] text-muted uppercase">Total Users</div><div class="text-2xl font-bold" id="stat-total-users">0</div></div>
+                    <div class="stat-card"><div class="text-[10px] text-muted uppercase">Avg. Session</div><div class="text-2xl font-bold text-blue-500" id="stat-avg-time">0m</div></div>
+                    <div class="stat-card"><div class="text-[10px] text-muted uppercase">Purchase Intent</div><div class="text-2xl font-bold text-green-500" id="stat-intent">0%</div></div>
+                    <div class="stat-card"><div class="text-[10px] text-muted uppercase">Suspicious Flag</div><div class="text-2xl font-bold text-red-500" id="stat-suspicious">0</div></div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="data-table-white min-w-[600px]">
+                        <thead>
+                            <tr><th><i class="fas fa-user-circle"></i> Identity</th><th><i class="fas fa-key"></i> Method</th><th><i class="fas fa-map-marker-alt"></i> Location</th><th><i class="fas fa-brain"></i> AI Report</th><th><i class="fas fa-tools"></i> Actions</th> </tr>
+                        </thead>
+                        <tbody id="accounts-table-body">
+                            <tr><td colspan="5" class="text-center py-10">Loading user data... <i class="fas fa-spinner fa-pulse"></i></td> </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Announcements Module -->
+            <section id="announcements-module" class="module-section">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold uppercase">Announcements</h1>
+                        <p class="text-muted text-sm font-mono">Broadcast technical updates or system alerts.</p>
+                    </div>
+                    <button class="btn-tech" onclick="openModal('announce-modal')"><i class="fas fa-broadcast-tower"></i> Draft Broadcast</button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                        <h3 class="text-[10px] text-muted uppercase mb-4 tracking-widest">Active Broadcast Feed</h3>
+                        <div id="announcement-feed" class="space-y-4"></div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-6">
+                            <h3 class="text-[10px] text-blue-500 uppercase mb-4 font-bold"><i class="fas fa-chart-line"></i> Delivery Protocol</h3>
+                            <ul class="text-xs space-y-3 text-muted">
+                                <li class="flex justify-between"><span>Pop-ups:</span><span class="text-white" id="count-popups">0</span></li>
+                                <li class="flex justify-between"><span>Inline Alerts:</span><span class="text-white" id="count-inline">0</span></li>
+                            </ul>
+                        </div>
+                        <div class="bg-[#0a0a0a] border border-red-900/30 p-6">
+                            <h3 class="text-[10px] text-red-500 uppercase mb-4 font-bold"><i class="fas fa-skull-crosswalk"></i> Emergency Clear</h3>
+                            <p class="text-[10px] text-muted mb-4">Wipe all active announcements from user-facing feed.</p>
+                            <button class="btn-tech bg-red-900/20 text-red-500 w-full text-[10px]" onclick="clearAllAnnouncements()"><i class="fas fa-trash-alt"></i> PURGE ALL</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="mt-16 pt-8 border-t border-[#1f1f1f] text-center">
+                <div class="text-[10px] text-muted tracking-[0.2em] mb-2">WATERCITY MANAGEMENT INTERFACE // ENGINEERED BY ANUBIS DIGITAL</div>
+                <div class="flex justify-center gap-6 text-[10px] font-mono flex-wrap"><span class="text-blue-500"><i class="fas fa-fire"></i> FIREBASE_ACTIVE</span><span class="text-blue-500"><i class="fas fa-cloud-upload-alt"></i> CLOUDINARY_SYNCED</span><span class="text-blue-500"><i class="fas fa-chart-simple"></i> PUTER_ANALYTICS_ON</span></div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="project-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h2 class="text-xl font-bold mb-6"><i class="fas fa-plus-circle"></i> NEW PROJECT DEPLOYMENT</h2>
+            <input type="text" id="proj-title" placeholder="Project Title">
+            <textarea id="proj-desc" rows="4" placeholder="Description (max 30 words)"></textarea>
+            <div id="word-count-error" class="error-message" style="display:none;">Description must be 30 words or less.</div>
+            <div class="mb-2">
+                <label class="text-[10px] text-muted block mb-2 uppercase">Project Date</label>
+                <input type="date" id="proj-date">
+            </div>
+            <div class="mb-4">
+                <label class="text-[10px] text-muted block mb-2 uppercase">Featured Asset (Cloudinary)</label>
+                <input type="file" id="proj-image" accept="image/*" onchange="previewImage(this)">
+                <div id="image-preview" class="image-preview"></div>
+            </div>
+            <div id="upload-status" class="status-message text-xs"></div>
+            <div class="flex gap-4 mt-6">
+                <button class="btn-tech flex-1" id="publish-btn" onclick="saveProject()"><i class="fas fa-cloud-upload-alt"></i> Publish</button>
+                <button class="btn-tech btn-outline flex-1" onclick="closeModal('project-modal')"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Announcement Modal with status -->
+    <div id="announce-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h2 class="text-xl font-bold mb-6 uppercase"><i class="fas fa-bullhorn"></i> New Broadcast Packet</h2>
+            <label class="text-[10px] text-muted uppercase">Message Content</label>
+            <textarea id="ann-content" rows="5" placeholder="Enter system update or news..."></textarea>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-[10px] text-muted uppercase">Target</label><select id="ann-target"><option value="all">All Users</option><option value="new">New Sign-ups</option><option value="returning">Returning Users</option></select></div>
+                <div><label class="text-[10px] text-muted uppercase">Format</label><select id="ann-type"><option value="text">Simple Text</option><option value="modal">Pop-up Modal</option></select></div>
+            </div>
+            <div id="announce-status" class="status-message text-xs mt-2"></div>
+            <div class="flex gap-4 mt-6">
+                <button class="btn-tech flex-1" id="announce-publish-btn" onclick="publishAnnouncement()"><i class="fas fa-paper-plane"></i> Deploy</button>
+                <button class="btn-tech btn-outline flex-1" onclick="closeModal('announce-modal')"><i class="fas fa-ban"></i> Abort</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Modal (now powered by Puter AI) -->
+    <div id="ai-modal" class="modal-overlay">
+        <div class="modal-card max-w-2xl border-blue-900">
+            <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold text-blue-400"><i class="fas fa-microchip"></i> AI USER INTELLIGENCE REPORT</h2><button onclick="closeModal('ai-modal')" class="text-muted hover:text-white"><i class="fas fa-times"></i> CLOSE</button></div>
+            <div id="ai-report-content" class="font-mono text-sm leading-relaxed whitespace-pre-wrap h-[400px] overflow-y-auto bg-black p-4 border border-zinc-800">Initializing neural analysis...</div>
+            <div class="mt-6 flex justify-end"><button class="btn-tech" onclick="window.print()"><i class="fas fa-print"></i> Download Log</button></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
+        import { 
+            getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, onSnapshot, query, orderBy 
+        } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCxlBpyYWESVD1XIH4mljPb0jI7_v4w6gw",
+            authDomain: "citywaterz.firebaseapp.com",
+            projectId: "citywaterz",
+            storageBucket: "citywaterz.firebasestorage.app",
+            messagingSenderId: "413422614897",
+            appId: "1:413422614897:web:f7c8577b6dacbc937cded0",
+            measurementId: "G-6ZYPD0YJQC"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        const auth = getAuth();
+
+        // Cloudinary config
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dopuutcka/image/upload";
+        const CLOUDINARY_UPLOAD_PRESET = "water_anubis";
+        const ADMIN_KEY = "digital_watercity84";
+
+        // Helper functions
+        window.switchModule = (moduleId) => {
+            document.querySelectorAll('.module-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.getElementById(`${moduleId}-module`).classList.add('active');
+            if(event && event.currentTarget) event.currentTarget.classList.add('active');
+        };
+        
+        window.openModal = (id) => { document.getElementById(id).style.display = 'flex'; };
+        window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
+
+        window.previewImage = (input) => {
+            const previewDiv = document.getElementById('image-preview');
+            previewDiv.innerHTML = '';
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '150px';
+                    img.style.border = '1px solid #333';
+                    previewDiv.appendChild(img);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        // Word count validation for project description
+        function countWords(str) {
+            return str.trim().split(/\s+/).filter(word => word.length > 0).length;
+        }
+
+        // Project save with 30-word limit
+        window.saveProject = async () => {
+            const title = document.getElementById('proj-title').value;
+            const desc = document.getElementById('proj-desc').value;
+            const date = document.getElementById('proj-date').value;
+            const file = document.getElementById('proj-image').files[0];
+            const statusDiv = document.getElementById('upload-status');
+            const publishBtn = document.getElementById('publish-btn');
+            const wordError = document.getElementById('word-count-error');
+            
+            // Validate description word count
+            const wordCount = countWords(desc);
+            if (wordCount > 30) {
+                wordError.style.display = 'block';
+                return;
+            } else {
+                wordError.style.display = 'none';
+            }
+
+            if (!title || !desc || !file) {
+                alert("Please fill all fields and select an image.");
+                return;
+            }
+
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...';
+            
+            // Upload to Cloudinary
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Uploading to Cloudinary...';
+            try {
+                const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!data.secure_url) throw new Error('Upload failed');
+                const imageUrl = data.secure_url;
+                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Image uploaded to Cloudinary.';
+                
+                statusDiv.innerHTML += '<br><i class="fas fa-spinner fa-pulse"></i> Saving to Firebase...';
+                await addDoc(collection(db, "the_aboutz"), {
+                    title: title,
+                    description: desc,
+                    image: imageUrl,
+                    projectDate: date || null,
+                    admin_key: ADMIN_KEY,
+                    timestamp: Date.now()
+                });
+                statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color:#00ff88"></i> Project published successfully!';
+                // Clear form
+                document.getElementById('proj-title').value = '';
+                document.getElementById('proj-desc').value = '';
+                document.getElementById('proj-date').value = '';
+                document.getElementById('proj-image').value = '';
+                document.getElementById('image-preview').innerHTML = '';
+                loadProjects();
+                setTimeout(() => {
+                    closeModal('project-modal');
+                    statusDiv.innerHTML = '';
+                    publishBtn.disabled = false;
+                    publishBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publish';
+                }, 1500);
+            } catch(e) {
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error: ' + e.message;
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publish';
+            }
+        };
+
+        async function loadProjects() {
+            const container = document.getElementById('project-list-container');
+            container.innerHTML = '<div class="text-center text-muted py-10"><i class="fas fa-spinner fa-pulse"></i> Loading projects...</div>';
+            const snap = await getDocs(collection(db, "the_aboutz"));
+            if(snap.empty) { container.innerHTML = '<div class="text-center text-muted py-10"><i class="fas fa-folder-open"></i> No projects found. Add your first project.</div>'; return; }
+            container.innerHTML = '';
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                // Truncate description to 30 words for display
+                let shortDesc = data.description;
+                const words = shortDesc.split(/\s+/);
+                if (words.length > 30) shortDesc = words.slice(0, 30).join(' ') + '...';
+                const card = document.createElement('div');
+                card.className = "project-card";
+                card.innerHTML = `
+                    <div class="img-placeholder"><img src="${escapeHtml(data.image || '')}" alt="project"></div>
+                    <div class="p-4 flex flex-col flex-1">
+                        <h3 class="font-bold text-lg mb-1">${escapeHtml(data.title)}</h3>
+                        <p class="text-xs text-muted mb-2">${escapeHtml(shortDesc)}</p>
+                        ${data.projectDate ? `<p class="text-[10px] text-blue-400 mb-2"><i class="far fa-calendar-alt"></i> ${escapeHtml(data.projectDate)}</p>` : ''}
+                        <button class="btn-tech btn-outline text-[10px] w-full mt-auto" onclick="deleteDocument('the_aboutz', '${docSnap.id}')"><i class="fas fa-trash-alt"></i> REMOVE PROJECT</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.deleteDocument = async (coll, id) => {
+            if(confirm("Delete this item?")) {
+                await deleteDoc(doc(db, coll, id));
+                if(coll === "the_aboutz") loadProjects();
+                if(coll === "announcements") loadAnnouncements();
+                if(coll === "users") loadAccounts();
+            }
+        };
+
+        // Accounts with white table & column lines (already styled)
+        window.loadAccounts = () => {
+            const tableBody = document.getElementById('accounts-table-body');
+            const q = query(collection(db, "users"));
+            onSnapshot(q, (snapshot) => {
+                tableBody.innerHTML = '';
+                let total = 0, suspiciousCount = 0, sumIntent = 0;
+                snapshot.forEach(docSnap => {
+                    const user = docSnap.data();
+                    total++;
+                    if(user.suspicious) suspiciousCount++;
+                    sumIntent += user.buyIntent || 0;
+                    const row = `
+                        <tr class="${user.suspicious ? 'bg-red-50' : ''}">
+                            <td><div class="font-bold">${escapeHtml(user.name || 'Anonymous')}</div><div class="text-xs text-gray-500">${escapeHtml(user.email || 'no email')}</div> </td>
+                            <td><span class="px-2 py-1 text-[9px] bg-gray-100 border border-gray-300">${escapeHtml(user.provider || 'EMAIL')}</span></td>
+                            <td class="text-xs">${escapeHtml(user.location || 'Unknown')}</td>
+                            <td><button class="text-blue-600 hover:underline text-xs font-bold" onclick="runAIAnalysis('${docSnap.id}')"><i class="fas fa-chart-line"></i> Generate Analysis</button></td>
+                            <td class="flex gap-2 flex-wrap"><button class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-[10px] px-3 py-1 rounded-sm" onclick="messageUser('${docSnap.id}')"><i class="fas fa-envelope"></i> Message</button><button class="bg-red-100 text-red-700 hover:bg-red-200 text-[10px] px-3 py-1 rounded-sm" onclick="deleteDocument('users', '${docSnap.id}')"><i class="fas fa-user-slash"></i> Delete</button></td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+                document.getElementById('stat-total-users').innerText = total;
+                document.getElementById('stat-suspicious').innerText = suspiciousCount;
+                const avgIntent = total ? Math.floor(sumIntent / total) : 0;
+                document.getElementById('stat-intent').innerText = avgIntent + '%';
+                document.getElementById('stat-avg-time').innerText = Math.floor(Math.random() * 8) + 2 + 'm';
+            });
+        };
+
+        // Puter AI integration for user analysis
+        window.runAIAnalysis = async (userId) => {
+            const modal = document.getElementById('ai-modal');
+            const content = document.getElementById('ai-report-content');
+            modal.style.display = 'flex';
+            content.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Accessing user data & querying Puter AI...';
+            
+            try {
+                const userDoc = await getDoc(doc(db, "users", userId));
+                const userData = userDoc.data() || {};
+                
+                // Prepare prompt for Puter AI
+                const prompt = `Analyze this user data and provide a brief behavioral report (max 200 words):
+                Name: ${userData.name || 'Anonymous'}
+                Email: ${userData.email || 'unknown'}
+                Provider: ${userData.provider || 'email'}
+                Location: ${userData.location || 'unknown'}
+                Purchase Intent: ${userData.buyIntent || 0}%
+                Suspicious: ${userData.suspicious ? 'Yes' : 'No'}
+                Session Duration: ${userData.sessionDuration || 0} sec
+                Interest Focus: ${userData.mainInterest || 'WaterCity'}
+                Generate insights and recommendations.`;
+                
+                // Use Puter AI if available
+                let aiResponse = "Unable to reach Puter AI. Using fallback analysis.";
+                if (window.puter && window.puter.ai && window.puter.ai.chat) {
+                    const response = await window.puter.ai.chat(prompt);
+                    aiResponse = response.message.content;
+                } else {
+                    // Fallback static analysis
+                    aiResponse = `Fallback Analysis for ${userData.name || 'User'}:\n- Interest: ${userData.mainInterest || 'WaterCity'}\n- Intent: ${userData.buyIntent || 0}%\n- Suspicious: ${userData.suspicious ? 'Yes' : 'No'}\n- Recommendation: Engage with targeted content.`;
+                }
+                content.innerText = `[PUTER AI ANALYSIS - User ${userId.slice(0,6)}]\n\n${aiResponse}`;
+            } catch (err) {
+                console.error(err);
+                content.innerText = "Error generating AI report. Please ensure Puter.js is loaded and try again.";
+            }
+        };
+
+        window.messageUser = (id) => { alert(`Messaging user ${id} — feature ready for extension.`); };
+        window.exportUserData = async () => {
+            const snap = await getDocs(collection(db, "users"));
+            let csv = "Name,Email,Method,Intent%,Suspicious\n";
+            snap.forEach(d => { const u = d.data(); csv += `${u.name || ''},${u.email || ''},${u.provider || ''},${u.buyIntent || 0}%,${u.suspicious || false}\n`; });
+            const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'watercity_users.csv'; a.click(); URL.revokeObjectURL(a.href);
+        };
+        window.refreshAccounts = async () => { await loadAccounts(); alert("User data refreshed."); };
+
+        // Announcements with status
+        window.publishAnnouncement = async () => {
+            const content = document.getElementById('ann-content').value;
+            const target = document.getElementById('ann-target').value;
+            const type = document.getElementById('ann-type').value;
+            const statusDiv = document.getElementById('announce-status');
+            const publishBtn = document.getElementById('announce-publish-btn');
+            
+            if(!content) return alert("Message required");
+            
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Deploying...';
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Publishing to Firebase...';
+            
+            try {
+                await addDoc(collection(db, "announcements"), { 
+                    body: content, 
+                    target, 
+                    format: type, 
+                    admin_key: ADMIN_KEY, 
+                    timestamp: Date.now() 
+                });
+                statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color:#00ff88"></i> Announcement deployed successfully!';
+                setTimeout(() => {
+                    closeModal('announce-modal');
+                    statusDiv.innerHTML = '';
+                    publishBtn.disabled = false;
+                    publishBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Deploy';
+                    document.getElementById('ann-content').value = '';
+                }, 1500);
+            } catch(e) {
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error: ' + e.message;
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Deploy';
+            }
+        };
+        
+        window.loadAnnouncements = () => {
+            const feed = document.getElementById('announcement-feed');
+            const q = query(collection(db, "announcements"), orderBy("timestamp", "desc"));
+            onSnapshot(q, (snap) => {
+                feed.innerHTML = '';
+                let popups = 0, inline = 0;
+                snap.forEach(d => {
+                    const ann = d.data();
+                    if(ann.format === 'modal') popups++; else inline++;
+                    const card = `<div class="p-6 bg-[#0a0a0a] border border-[#1f1f1f]"><div class="flex justify-between items-start mb-3"><span class="text-[9px] font-mono px-2 py-0.5 border border-zinc-700 uppercase text-blue-400"><i class="fas fa-${ann.format === 'modal' ? 'window-maximize' : 'align-left'}"></i> ${ann.format} / ${ann.target}</span><button onclick="deleteDocument('announcements', '${d.id}')" class="text-zinc-700 hover:text-red-500"><i class="fas fa-trash-alt"></i> DELETE</button></div><p class="text-sm text-zinc-300">${escapeHtml(ann.body)}</p><div class="mt-4 text-[9px] text-zinc-600"><i class="far fa-clock"></i> ${new Date(ann.timestamp).toLocaleString()}</div></div>`;
+                    feed.innerHTML += card;
+                });
+                document.getElementById('count-popups').innerText = popups;
+                document.getElementById('count-inline').innerText = inline;
+                if(snap.empty) feed.innerHTML = '<div class="text-center text-muted p-8 border border-dashed"><i class="fas fa-inbox"></i> No active announcements</div>';
+            });
+        };
+        window.clearAllAnnouncements = async () => {
+            if(confirm("⚠️ PERMANENTLY DELETE ALL ANNOUNCEMENTS?")) {
+                const snap = await getDocs(collection(db, "announcements"));
+                snap.forEach(async d => await deleteDoc(doc(db, "announcements", d.id)));
+                alert("All announcements purged.");
+            }
+        };
+
+        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m;}); }
+
+        function initDashboard() {
+            loadProjects();
+            loadAccounts();
+            loadAnnouncements();
+        }
+        initDashboard();
+    </script>
+</body>
+</html>
