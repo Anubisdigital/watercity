@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>WaterCity Admin | Anubis Digital</title>
+    
+    <!-- CDN Resources -->
+    <script src="https://cdn.jsdelivr.net/npm/puter.js@2/dist/puter.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --accent-blue: #0070f3;
+            --border-color: #1f1f1f;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(var(--border-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .admin-wrapper {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+        
+        aside {
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+        
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.85rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0;
+            gap: 12px;
+        }
+        
+        .nav-link i {
+            width: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-main);
+            background-color: var(--border-color);
+            border-left: 2px solid var(--accent-blue);
+        }
+        
+        main {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .module-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        
+        .module-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .btn-tech {
+            background-color: var(--accent-blue);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 0 !important;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-tech:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+        
+        .data-table-white {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            color: #111;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .data-table-white th,
+        .data-table-white td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+        }
+        
+        .data-table-white th:last-child,
+        .data-table-white td:last-child {
+            border-right: none;
+        }
+        
+        .data-table-white th {
+            background: #f8f9fa;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+            color: #1e293b;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+        
+        .data-table-white tr:hover {
+            background: #f1f5f9;
+        }
+        
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .project-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .project-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-4px);
+        }
+        
+        .img-placeholder {
+            width: 100%;
+            height: 220px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border-color);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .img-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .thumbnails-row {
+            display: flex;
+            gap: 6px;
+            padding: 10px;
+            background: #0f0f0f;
+            overflow-x: auto;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .thumb-item {
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        
+        .thumb-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        input,
+        textarea,
+        select {
+            background: #111;
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 12px;
+            width: 100%;
+            margin-bottom: 1rem;
+            border-radius: 0 !important;
+            outline: none;
+        }
+        
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--accent-blue);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal-card {
+            width: 100%;
+            max-width: 850px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            animation: fadeIn 0.2s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .image-preview-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+            border: 1px dashed var(--border-color);
+            padding: 1rem;
+            background: #0a0a0a;
+            min-height: 140px;
+            align-items: center;
+        }
+        
+        .preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: #1e1e1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .preview-item.selected {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.5);
+        }
+        
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .cover-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--accent-blue);
+            color: white;
+            font-size: 10px;
+            padding: 2px 5px;
+            font-weight: bold;
+        }
+        
+        .remove-img-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff3b30;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.1s;
+            z-index: 2;
+            border: 1px solid white;
+        }
+        
+        .remove-img-btn:hover {
+            background: #ff1a1a;
+            transform: scale(1.05);
+        }
+        
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 15px 0;
+            align-items: center;
+        }
+        
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.1s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.active {
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px black;
+        }
+        
+        .status-message {
+            font-size: 0.8rem;
+            padding: 8px;
+            margin-top: 8px;
+            background: #1a1a1a;
+            border-left: 3px solid var(--accent-blue);
+        }
+        
+        .stat-card {
+            background: #0a0a0a;
+            border: 1px solid #1f1f1f;
+            padding: 1.25rem;
+        }
+        
+        .rich-toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            background: #0f0f0f;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .rich-toolbar button {
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 6px 14px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.1s;
+        }
+        
+        .rich-toolbar button:hover {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        
+        .content-editable {
+            background: #0a0a0a;
+            border: 1px solid var(--border-color);
+            min-height: 220px;
+            padding: 16px;
+            color: white;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-y: auto;
+            outline: none;
+        }
+        
+        .content-editable p {
+            margin: 1em 0 1em 2em !important;
+            background: white;
+            color: black;
+            padding: 8px 12px;
+        }
+        .content-editable ul {
+            list-style-type: circle;
+            margin-left: 2rem;
+            padding-left: 1rem;
+        }
+        .content-editable h3 {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-decoration: underline;
+            margin: 1rem 0;
+        }
+        .content-editable .distinguish-text {
+            font-weight: bold;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-wrapper {
+                display: flex;
+                flex-direction: column;
+            }
+            aside {
+                position: relative;
+                height: auto;
+                padding: 1rem;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .logo-container {
+                margin-bottom: 0;
+                flex: 1;
+            }
+            nav {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+                width: 100%;
+                order: 3;
+                margin-top: 1rem;
+            }
+            .nav-link {
+                flex: 1 0 auto;
+                justify-content: center;
+                margin-bottom: 0;
+            }
+            .mt-auto {
+                margin-top: 0;
+                order: 2;
+            }
+            main {
+                padding: 1.25rem;
+            }
+            .project-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            .thumb-item {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .text-muted {
+            color: var(--text-muted);
+        }
+        
+        .image-counter {
+            font-size: 0.7rem;
+            background: #1f1f1f;
+            display: inline-block;
+            padding: 4px 8px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grid-overlay"></div>
+    
+    <div class="admin-wrapper">
+        <aside>
+            <div class="logo-container">
+                <img class="logo-img" src="log1.png" alt="WaterCity Logo">
+                <span class="font-bold tracking-tighter text-xl">WATERCITY</span>
+            </div>
+            <nav>
+                <button class="nav-link active" onclick="switchModule('projects')"><i class="fas fa-folder-open"></i> PROJECTS</button>
+                <button class="nav-link" onclick="switchModule('accounts')"><i class="fas fa-users"></i> ACCOUNTS</button>
+                <button class="nav-link" onclick="switchModule('announcements')"><i class="fas fa-bullhorn"></i> ANNOUNCEMENTS</button>
+            </nav>
+            <div class="mt-auto pt-6">
+                <div class="text-[10px] text-muted uppercase tracking-widest mb-2">System Status</div>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-xs font-mono">FIRESTORE_ACTIVE</span>
+                </div>
+            </div>
+        </aside>
+        
+        <main>
+            <section id="projects-module" class="module-section active">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold uppercase">Projects Gallery</h1>
+                        <p class="text-muted text-sm">Manage projects | Rich text content (paragraph, list, heading, distinguish)</p>
+                    </div>
+                    <button class="btn-tech" onclick="openAddProjectModal()"><i class="fas fa-plus"></i> Add New Project</button>
+                </div>
+                <div class="project-grid" id="project-list-container">
+                    <div class="project-card animate-pulse">
+                        <div class="img-placeholder bg-zinc-900"></div>
+                        <div class="p-4">
+                            <div class="h-4 bg-zinc-800 w-3/4 mb-2"></div>
+                            <div class="h-3 bg-zinc-900 w-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="accounts-module" class="module-section">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                    <div><h1 class="text-2xl md:text-3xl font-bold uppercase">Accounts & Registry</h1><p class="text-muted text-sm font-mono">Live sync with Firebase & Puter.js analytics.</p></div>
+                    <div class="flex gap-2 flex-wrap"><button class="btn-tech btn-outline" onclick="exportUserData()"><i class="fas fa-download"></i> Export CSV</button><button class="btn-tech" onclick="refreshAccounts()"><i class="fas fa-sync-alt"></i> Sync Database</button></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-card"><div class="text-[10px] text-muted uppercase">Total Users</div><div class="text-2xl font-bold" id="stat-total-users">0</div></div>
+                    <div class="stat-card"><div class="text-[10px] text-muted uppercase">Avg. Session</div><div class="text-2xl font-bold text-blue-500" id="stat-avg-time">0m</div></div>
+                    <div class="stat-card"><div class="text-[10px] text-muted uppercase">Purchase Intent</div><div class="text-2xl font-bold text-green-500" id="stat-intent">0%</div></div>
+                    <div class="stat-card"><div class="text-[10px] text-muted uppercase">Suspicious Flag</div><div class="text-2xl font-bold text-red-500" id="stat-suspicious">0</div></div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="data-table-white min-w-[600px]">
+                        <thead>
+                            <tr><th>Identity</th><th>Method</th><th>Location</th><th>AI Report</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="accounts-table-body"><tr><td colspan="5" class="text-center py-10">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section id="announcements-module" class="module-section">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+                    <div><h1 class="text-2xl md:text-3xl font-bold uppercase">Announcements</h1><p class="text-muted text-sm font-mono">Broadcast with custom text color (shown on frontend)</p></div>
+                    <button class="btn-tech" onclick="openModal('announce-modal')"><i class="fas fa-broadcast-tower"></i> Draft Broadcast</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2"><div id="announcement-feed" class="space-y-4"></div></div>
+                    <div class="space-y-6">
+                        <div class="bg-[#0a0a0a] border p-6"><h3 class="text-[10px] text-blue-500 uppercase mb-4">Delivery Protocol</h3><ul class="text-xs space-y-3"><li class="flex justify-between"><span>Pop-ups:</span><span class="text-white" id="count-popups">0</span></li><li class="flex justify-between"><span>Inline Alerts:</span><span class="text-white" id="count-inline">0</span></li></ul></div>
+                        <div class="bg-[#0a0a0a] border border-red-900/30 p-6"><button class="btn-tech bg-red-900/20 text-red-500 w-full text-[10px]" onclick="clearAllAnnouncements()"><i class="fas fa-trash-alt"></i> PURGE ALL</button></div>
+                    </div>
+                </div>
+            </section>
+            <footer class="mt-16 pt-8 border-t border-[#1f1f1f] text-center text-[10px] text-muted">WATERCITY // ENGINEERED BY ANUBIS DIGITAL</footer>
+        </main>
+    </div>
+    
+    <!-- PROJECT MODAL -->
+    <div id="project-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h2 class="text-xl font-bold mb-6" id="modal-title"><i class="fas fa-plus-circle"></i> NEW PROJECT</h2>
+            <input type="text" id="proj-title" placeholder="Project Title">
+            <input type="date" id="proj-date" class="mb-4">
+            <div class="mb-2"><label class="text-[10px] text-muted block mb-2 uppercase">Project Content (Paragraph, List, Heading, Distinguish)</label></div>
+            <div class="rich-toolbar">
+                <button type="button" onclick="applyRichFormat('paragraph')"><i class="fas fa-paragraph"></i> Paragraph</button>
+                <button type="button" onclick="applyRichFormat('list')"><i class="fas fa-list-ul"></i> List (circle)</button>
+                <button type="button" onclick="applyRichFormat('heading')"><i class="fas fa-heading"></i> Heading</button>
+                <button type="button" onclick="applyRichFormat('distinguish')"><i class="fas fa-bold"></i> Distinguish (bold+gray)</button>
+            </div>
+            <div id="rich-editor" class="content-editable" contenteditable="true"></div>
+            <div class="mb-4 mt-4">
+                <label class="text-[10px] text-muted block mb-2 uppercase">Project Images (Max 6) — Click image to set COVER</label>
+                <div id="multi-image-preview" class="image-preview-grid"><div class="text-muted text-xs w-full text-center">No images</div></div>
+                <div class="flex justify-between items-center mt-2"><span id="image-counter" class="image-counter text-muted">0 / 6 images</span><button type="button" id="add-more-images-btn" class="btn-tech text-sm py-2 px-4" onclick="triggerFileSelect()"><i class="fas fa-plus-circle"></i> SELECT IMAGES</button></div>
+                <input type="file" id="hidden-image-input" accept="image/*" multiple style="display:none;">
+                <div class="text-[10px] text-muted mt-2"><i class="fas fa-info-circle"></i> Upload new or keep existing. Click ✕ to remove.</div>
+            </div>
+            <div id="upload-status" class="status-message text-xs"></div>
+            <div class="flex gap-4 mt-6"><button class="btn-tech flex-1" id="publish-btn" onclick="saveOrUpdateProject()"><i class="fas fa-cloud-upload-alt"></i> Publish</button><button class="btn-tech btn-outline flex-1" onclick="closeProjectModal()"><i class="fas fa-times"></i> Cancel</button></div>
+        </div>
+    </div>
+    
+    <!-- ANNOUNCEMENT MODAL -->
+    <div id="announce-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h2 class="text-xl font-bold mb-6 uppercase"><i class="fas fa-bullhorn"></i> New Broadcast</h2>
+            <textarea id="ann-content" rows="5" placeholder="Message..."></textarea>
+            <div class="color-palette" id="color-palette-container"></div>
+            <input type="color" id="custom-color-input" class="w-full h-10" value="#ffffff">
+            <div class="grid grid-cols-2 gap-4">
+                <div><select id="ann-target"><option value="all">All Users</option></select></div>
+                <div><select id="ann-type"><option value="text">Inline</option><option value="modal">Pop-up</option></select></div>
+            </div>
+            <div class="flex gap-4 mt-6"><button class="btn-tech flex-1" onclick="publishAnnouncement()">Deploy</button><button class="btn-tech btn-outline flex-1" onclick="closeModal('announce-modal')">Cancel</button></div>
+        </div>
+    </div>
+    
+    <div id="ai-modal" class="modal-overlay"><div class="modal-card max-w-2xl"><div id="ai-report-content" class="font-mono text-sm p-4 bg-black border"></div><button class="btn-tech mt-4" onclick="closeModal('ai-modal')">Close</button></div></div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+        
+        const firebaseConfig = { apiKey: "AIzaSyCxlBpyYWESVD1XIH4mljPb0jI7_v4w6gw", authDomain: "citywaterz.firebaseapp.com", projectId: "citywaterz", storageBucket: "citywaterz.firebasestorage.app", messagingSenderId: "413422614897", appId: "1:413422614897:web:f7c8577b6dacbc937cded0", measurementId: "G-6ZYPD0YJQC" };
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        const auth = getAuth();
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dopuutcka/image/upload";
+        const CLOUDINARY_UPLOAD_PRESET = "water_anubis";
+        const ADMIN_KEY = "digital_watercity84";
+        
+        // Global state
+        let editingProjectId = null;
+        let currentImageItems = []; // { url?: string, file?: File, isRemote: boolean }
+        let coverIndex = 0;
+        const MAX_IMAGES = 6;
+        
+        // Rich text formatting
+        window.applyRichFormat = (type) => {
+            const editor = document.getElementById('rich-editor');
+            if (!editor) return;
+            editor.focus();
+            if (type === 'paragraph') {
+                document.execCommand('formatBlock', false, '<p>');
+            } else if (type === 'list') {
+                document.execCommand('insertUnorderedList', false, null);
+            } else if (type === 'heading') {
+                document.execCommand('formatBlock', false, '<h3>');
+            } else if (type === 'distinguish') {
+                const sel = window.getSelection();
+                if (!sel.isCollapsed) {
+                    document.execCommand('styleWithCSS', false, true);
+                    document.execCommand('fontWeight', false, 'bold');
+                    document.execCommand('foreColor', false, '#6c757d');
+                } else {
+                    alert('Select some text first to apply Distinguish style.');
+                }
+            }
+        };
+        
+        // Image preview management
+        function renderImagePreviews() {
+            const container = document.getElementById('multi-image-preview');
+            const counterSpan = document.getElementById('image-counter');
+            if (!container) return;
+            container.innerHTML = '';
+            if (currentImageItems.length === 0) {
+                container.innerHTML = '<div class="text-muted text-xs w-full text-center">No images selected. Add up to 6.</div>';
+                if (counterSpan) counterSpan.innerText = `0 / ${MAX_IMAGES} images`;
+                return;
+            }
+            currentImageItems.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = `preview-item ${coverIndex === idx ? 'selected' : ''}`;
+                div.setAttribute('data-idx', idx);
+                div.onclick = (e) => { if (!e.target.classList.contains('remove-img-btn')) { coverIndex = idx; renderImagePreviews(); } };
+                const img = document.createElement('img');
+                if (item.isRemote && item.url) img.src = item.url;
+                else if (item.file) img.src = URL.createObjectURL(item.file);
+                const badge = document.createElement('div');
+                badge.className = 'cover-badge';
+                badge.innerText = coverIndex === idx ? 'COVER' : '';
+                const removeBtn = document.createElement('div');
+                removeBtn.className = 'remove-img-btn';
+                removeBtn.innerHTML = '✕';
+                removeBtn.onclick = (e) => { e.stopPropagation(); removeImageAtIndex(idx); };
+                div.appendChild(img);
+                div.appendChild(badge);
+                div.appendChild(removeBtn);
+                container.appendChild(div);
+            });
+            if (counterSpan) counterSpan.innerText = `${currentImageItems.length} / ${MAX_IMAGES} images`;
+            const addBtn = document.getElementById('add-more-images-btn');
+            if (addBtn) addBtn.disabled = currentImageItems.length >= MAX_IMAGES;
+        }
+        
+        function removeImageAtIndex(idx) {
+            if (idx < 0 || idx >= currentImageItems.length) return;
+            currentImageItems.splice(idx, 1);
+            if (coverIndex >= currentImageItems.length && currentImageItems.length > 0) coverIndex = currentImageItems.length - 1;
+            else if (currentImageItems.length === 0) coverIndex = 0;
+            renderImagePreviews();
+        }
+        
+        // Handle file selection from input
+        function handleNewImageFiles(inputElem) {
+            const newFiles = Array.from(inputElem.files);
+            if (newFiles.length === 0) return;
+            let total = currentImageItems.length + newFiles.length;
+            if (total > MAX_IMAGES) {
+                alert(`Max ${MAX_IMAGES} images allowed. You can add only ${MAX_IMAGES - currentImageItems.length} more.`);
+                const allowed = MAX_IMAGES - currentImageItems.length;
+                const sliceFiles = newFiles.slice(0, allowed);
+                sliceFiles.forEach(f => currentImageItems.push({ file: f, isRemote: false }));
+            } else {
+                newFiles.forEach(f => currentImageItems.push({ file: f, isRemote: false }));
+            }
+            if (currentImageItems.length && coverIndex === undefined) coverIndex = 0;
+            renderImagePreviews();
+            inputElem.value = '';
+        }
+        
+        window.triggerFileSelect = () => { 
+            if (currentImageItems.length >= MAX_IMAGES) { 
+                alert(`Maximum ${MAX_IMAGES} images reached.`); 
+                return; 
+            } 
+            const fileInput = document.getElementById('hidden-image-input');
+            fileInput.click();
+        };
+        
+        const fileInput = document.getElementById('hidden-image-input');
+        if (fileInput) {
+            fileInput.onchange = function(e) { handleNewImageFiles(this); };
+        }
+        
+        function resetProjectForm() {
+            document.getElementById('proj-title').value = '';
+            document.getElementById('proj-date').value = '';
+            document.getElementById('rich-editor').innerHTML = '';
+            currentImageItems = [];
+            coverIndex = 0;
+            editingProjectId = null;
+            renderImagePreviews();
+            document.getElementById('upload-status').innerHTML = '';
+            document.getElementById('modal-title').innerHTML = '<i class="fas fa-plus-circle"></i> NEW PROJECT';
+            document.getElementById('publish-btn').innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publish';
+        }
+        
+        // ========== ENHANCED PUBLISH WITH LOADING + LIVE UPDATES ==========
+        window.saveOrUpdateProject = async function() {
+            const title = document.getElementById('proj-title').value.trim();
+            const date = document.getElementById('proj-date').value;
+            const richHtml = document.getElementById('rich-editor').innerHTML;
+            if (!title || !richHtml.trim()) { alert("❌ Title and content required."); return; }
+            if (currentImageItems.length === 0) { alert("❌ At least one image required."); return; }
+            
+            const statusDiv = document.getElementById('upload-status');
+            const publishBtn = document.getElementById('publish-btn');
+            const originalBtnHTML = publishBtn.innerHTML;
+            
+            // Disable button and show loading state
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> PROCESSING...';
+            statusDiv.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Starting project validation...';
+            
+            try {
+                // Step 1: Prepare images list
+                const newFiles = currentImageItems.filter(item => !item.isRemote && item.file);
+                const remoteUrls = currentImageItems.filter(item => item.isRemote && item.url).map(item => item.url);
+                const totalNew = newFiles.length;
+                
+                let uploadedUrls = [];
+                if (totalNew > 0) {
+                    statusDiv.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Uploading ${totalNew} image(s) to Cloudinary...`;
+                    // Upload one by one with progress updates
+                    for (let i = 0; i < newFiles.length; i++) {
+                        const fileItem = newFiles[i];
+                        statusDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> Uploading image ${i+1} of ${totalNew}: <strong>${fileItem.file.name}</strong> ...`;
+                        const formData = new FormData();
+                        formData.append('file', fileItem.file);
+                        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                        const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                        const data = await res.json();
+                        if (!data.secure_url) throw new Error(`Failed to upload ${fileItem.file.name}`);
+                        uploadedUrls.push(data.secure_url);
+                        statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> Uploaded ${i+1}/${totalNew} – ${fileItem.file.name} ready.`;
+                    }
+                }
+                
+                // Final image array: remote existing + newly uploaded
+                const finalImageUrls = [...remoteUrls, ...uploadedUrls];
+                const coverImageUrl = finalImageUrls[coverIndex] || finalImageUrls[0];
+                const projectData = { 
+                    title, 
+                    projectDate: date || null, 
+                    contentHtml: richHtml,
+                    description: richHtml.replace(/<[^>]*>/g, '').substring(0, 200),
+                    images: finalImageUrls, 
+                    coverImage: coverImageUrl, 
+                    admin_key: ADMIN_KEY, 
+                    timestamp: Date.now() 
+                };
+                
+                statusDiv.innerHTML = '<i class="fas fa-database"></i> Saving to Firestore database...';
+                if (editingProjectId) {
+                    await updateDoc(doc(db, "the_aboutz", editingProjectId), projectData);
+                    statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color:#2ed573;"></i> ✅ Project UPDATED successfully! Refreshing gallery...';
+                } else {
+                    await addDoc(collection(db, "the_aboutz"), projectData);
+                    statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color:#2ed573;"></i> ✅ Project PUBLISHED successfully! Refreshing gallery...';
+                }
+                
+                // Reload projects to reflect changes immediately
+                await loadProjects();
+                statusDiv.innerHTML += ' <i class="fas fa-sync-alt fa-fw"></i> Gallery updated.';
+                
+                // Reset form and close modal after short delay showing success
+                resetProjectForm();
+                setTimeout(() => {
+                    closeProjectModal();
+                    // ensure status is cleared after modal close, but button reset already
+                    publishBtn.disabled = false;
+                    publishBtn.innerHTML = originalBtnHTML;
+                }, 1400);
+                
+            } catch (err) {
+                console.error(err);
+                statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ff4757;"></i> ❌ Error: ${err.message}. Please retry.`;
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = originalBtnHTML;
+            }
+        };
+        
+        async function loadProjectForEdit(projectId) {
+            const docSnap = await getDoc(doc(db, "the_aboutz", projectId));
+            if (!docSnap.exists()) return;
+            const data = docSnap.data();
+            editingProjectId = projectId;
+            document.getElementById('proj-title').value = data.title || '';
+            document.getElementById('proj-date').value = data.projectDate || '';
+            document.getElementById('rich-editor').innerHTML = data.contentHtml || data.description || '';
+            currentImageItems = [];
+            if (data.images && Array.isArray(data.images)) {
+                data.images.forEach(url => currentImageItems.push({ url, isRemote: true }));
+            }
+            coverIndex = 0;
+            if (data.coverImage && data.images) coverIndex = data.images.findIndex(img => img === data.coverImage);
+            if (coverIndex === -1) coverIndex = 0;
+            renderImagePreviews();
+            document.getElementById('modal-title').innerHTML = '<i class="fas fa-edit"></i> EDIT PROJECT';
+            document.getElementById('publish-btn').innerHTML = '<i class="fas fa-save"></i> Update Project';
+            openModal('project-modal');
+        }
+        
+        window.openAddProjectModal = () => { resetProjectForm(); openModal('project-modal'); };
+        window.closeProjectModal = () => { closeModal('project-modal'); resetProjectForm(); };
+        
+        async function loadProjects() {
+            const container = document.getElementById('project-list-container');
+            container.innerHTML = '<div class="text-center text-muted py-10"><i class="fas fa-spinner fa-pulse"></i> Loading projects...</div>';
+            const snap = await getDocs(collection(db, "the_aboutz"));
+            if (snap.empty) { container.innerHTML = '<div class="text-center text-muted py-10">No projects found.</div>'; return; }
+            container.innerHTML = '';
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                const imagesArray = data.images || [];
+                const coverImg = data.coverImage || (imagesArray[0] || '');
+                let previewText = data.contentHtml ? data.contentHtml.replace(/<[^>]*>/g, '').substring(0, 100) : (data.description || '');
+                const card = document.createElement('div'); card.className = "project-card";
+                let thumbnailsHtml = imagesArray.length ? `<div class="thumbnails-row">${imagesArray.map(img => `<div class="thumb-item"><img src="${escapeHtml(img)}" loading="lazy"></div>`).join('')}</div>` : '';
+                card.innerHTML = `<div class="img-placeholder"><img src="${escapeHtml(coverImg)}" alt="cover"></div><div class="p-4"><h3 class="font-bold text-xl">${escapeHtml(data.title)}</h3><p class="text-xs text-muted">${escapeHtml(previewText)}...</p>${data.projectDate ? `<p class="text-[10px] text-blue-400 mt-1">${escapeHtml(data.projectDate)}</p>` : ''}<div class="flex justify-between mt-3"><span class="text-[9px]">${imagesArray.length} image(s)</span><div><button class="btn-tech text-[10px] py-1 px-3 mr-2" onclick="loadProjectForEdit('${docSnap.id}')"><i class="fas fa-edit"></i> Edit</button><button class="btn-tech btn-outline text-[10px] py-1 px-3" onclick="deleteDocument('the_aboutz', '${docSnap.id}')">REMOVE</button></div></div></div>${thumbnailsHtml}`;
+                container.appendChild(card);
+            });
+        }
+        
+        // Announcements
+        const colorPalette = ['#ffffff', '#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#9b59b6'];
+        function initColorPicker() { 
+            const container = document.getElementById('color-palette-container'); 
+            if (!container) return; 
+            container.innerHTML = ''; 
+            colorPalette.forEach(col => { 
+                const circle = document.createElement('div'); 
+                circle.className = 'color-option'; 
+                circle.style.backgroundColor = col; 
+                circle.onclick = () => { document.getElementById('custom-color-input').value = col; document.querySelectorAll('.color-option').forEach(c => c.classList.remove('active')); circle.classList.add('active'); }; 
+                container.appendChild(circle); 
+            }); 
+        }
+        
+        window.publishAnnouncement = async () => { 
+            const content = document.getElementById('ann-content').value; 
+            const target = document.getElementById('ann-target').value; 
+            const type = document.getElementById('ann-type').value; 
+            const textColor = document.getElementById('custom-color-input').value; 
+            if (!content) return alert("Message required"); 
+            await addDoc(collection(db, "announcements"), { body: content, target, format: type, textColor, admin_key: ADMIN_KEY, timestamp: Date.now() }); 
+            closeModal('announce-modal'); 
+            document.getElementById('ann-content').value = ''; 
+            loadAnnouncements(); 
+        };
+        
+        window.loadAnnouncements = () => { 
+            const feed = document.getElementById('announcement-feed'); 
+            const q = query(collection(db, "announcements"), orderBy("timestamp", "desc")); 
+            onSnapshot(q, (snap) => { 
+                feed.innerHTML = ''; 
+                let popups = 0, inline = 0; 
+                snap.forEach(d => { 
+                    const ann = d.data(); 
+                    if (ann.format === 'modal') popups++; 
+                    else inline++; 
+                    feed.innerHTML += `<div class="p-4 bg-[#0a0a0a] border"><div class="flex justify-between"><span class="text-[9px] text-blue-400">${ann.format}/${ann.target}</span><button onclick="deleteDocument('announcements', '${d.id}')" class="text-red-500 text-xs">DELETE</button></div><p style="color:${ann.textColor||'white'}" class="font-bold">${escapeHtml(ann.body)}</p><div class="text-[9px] text-muted mt-2">${new Date(ann.timestamp).toLocaleString()}</div></div>`; 
+                }); 
+                document.getElementById('count-popups').innerText = popups; 
+                document.getElementById('count-inline').innerText = inline; 
+                if (snap.empty) feed.innerHTML = '<div class="text-center text-muted p-4">No announcements</div>'; 
+            }); 
+        };
+        
+        window.clearAllAnnouncements = async () => { if (confirm("PURGE ALL?")) { const snap = await getDocs(collection(db, "announcements")); snap.forEach(async d => await deleteDoc(doc(db, "announcements", d.id))); loadAnnouncements(); } };
+        
+        // Accounts
+        window.loadAccounts = () => { 
+            const table = document.getElementById('accounts-table-body'); 
+            const q = collection(db, "users"); 
+            onSnapshot(q, snap => { 
+                table.innerHTML = ''; 
+                let total = 0, susp = 0, intentSum = 0; 
+                snap.forEach(d => { 
+                    const u = d.data(); 
+                    total++; 
+                    if (u.suspicious) susp++; 
+                    intentSum += u.buyIntent || 0; 
+                    table.innerHTML += `<tr><td><b>${escapeHtml(u.name||'?')}</b><div class="text-xs">${escapeHtml(u.email||'')}</div></td><td>${escapeHtml(u.provider||'email')}</td><td>${escapeHtml(u.location||'unknown')}</td><td><button class="text-blue-600 text-xs" onclick="runAIAnalysis('${d.id}')">Analyze</button></td><td><button class="bg-gray-200 text-xs px-2 py-1" onclick="deleteDocument('users','${d.id}')">Delete</button></td></tr>`; 
+                }); 
+                document.getElementById('stat-total-users').innerText = total; 
+                document.getElementById('stat-suspicious').innerText = susp; 
+                document.getElementById('stat-intent').innerText = total ? Math.floor(intentSum / total) : 0; 
+                document.getElementById('stat-avg-time').innerText = "3m"; 
+            }); 
+        };
+        
+        window.runAIAnalysis = async (userId) => { 
+            const modal = document.getElementById('ai-modal'); 
+            const content = document.getElementById('ai-report-content'); 
+            modal.style.display = 'flex'; 
+            content.innerText = "AI simulation: User behavioral analysis complete. No anomalies detected."; 
+        };
+        
+        window.exportUserData = async () => { 
+            const snap = await getDocs(collection(db, "users")); 
+            let csv = "Name,Email,Provider\n"; 
+            snap.forEach(d => { const u = d.data(); csv += `${u.name||''},${u.email||''},${u.provider||''}\n`; }); 
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(new Blob([csv])); 
+            a.download = 'users.csv'; 
+            a.click(); 
+        };
+        
+        window.refreshAccounts = () => loadAccounts();
+        
+        // Generic helpers
+        window.switchModule = (id) => { document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active')); document.getElementById(`${id}-module`).classList.add('active'); };
+        window.openModal = (id) => { document.getElementById(id).style.display = 'flex'; };
+        window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
+        window.deleteDocument = async (coll, id) => { if (confirm("Delete?")) { await deleteDoc(doc(db, coll, id)); if (coll === "the_aboutz") loadProjects(); if (coll === "announcements") loadAnnouncements(); if (coll === "users") loadAccounts(); } };
+        
+        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+        
+        function initDashboard() { loadProjects(); loadAccounts(); loadAnnouncements(); initColorPicker(); }
+        
+        window.loadProjectForEdit = loadProjectForEdit;
+        initDashboard();
+    </script>
+</body>
+</html>
